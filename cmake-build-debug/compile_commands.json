@@ -1,0 +1,50 @@
+[
+{
+  "directory": "/home/mooooonk/Code/CppProjects/Schemer/cmake-build-debug",
+  "command": "/usr/bin/c++ -g -fdiagnostics-color=always -g -o CMakeFiles/myscheme.dir/src/main.cpp.o -c /home/mooooonk/Code/CppProjects/Schemer/src/main.cpp",
+  "file": "/home/mooooonk/Code/CppProjects/Schemer/src/main.cpp",
+  "output": "CMakeFiles/myscheme.dir/src/main.cpp.o"
+},
+{
+  "directory": "/home/mooooonk/Code/CppProjects/Schemer/cmake-build-debug",
+  "command": "/usr/bin/c++ -g -fdiagnostics-color=always -g -o CMakeFiles/myscheme.dir/src/syntax.cpp.o -c /home/mooooonk/Code/CppProjects/Schemer/src/syntax.cpp",
+  "file": "/home/mooooonk/Code/CppProjects/Schemer/src/syntax.cpp",
+  "output": "CMakeFiles/myscheme.dir/src/syntax.cpp.o"
+},
+{
+  "directory": "/home/mooooonk/Code/CppProjects/Schemer/cmake-build-debug",
+  "command": "/usr/bin/c++ -g -fdiagnostics-color=always -g -o CMakeFiles/myscheme.dir/src/RE.cpp.o -c /home/mooooonk/Code/CppProjects/Schemer/src/RE.cpp",
+  "file": "/home/mooooonk/Code/CppProjects/Schemer/src/RE.cpp",
+  "output": "CMakeFiles/myscheme.dir/src/RE.cpp.o"
+},
+{
+  "directory": "/home/mooooonk/Code/CppProjects/Schemer/cmake-build-debug",
+  "command": "/usr/bin/c++ -g -fdiagnostics-color=always -g -o CMakeFiles/myscheme.dir/src/parser.cpp.o -c /home/mooooonk/Code/CppProjects/Schemer/src/parser.cpp",
+  "file": "/home/mooooonk/Code/CppProjects/Schemer/src/parser.cpp",
+  "output": "CMakeFiles/myscheme.dir/src/parser.cpp.o"
+},
+{
+  "directory": "/home/mooooonk/Code/CppProjects/Schemer/cmake-build-debug",
+  "command": "/usr/bin/c++ -g -fdiagnostics-color=always -g -o CMakeFiles/myscheme.dir/src/expr.cpp.o -c /home/mooooonk/Code/CppProjects/Schemer/src/expr.cpp",
+  "file": "/home/mooooonk/Code/CppProjects/Schemer/src/expr.cpp",
+  "output": "CMakeFiles/myscheme.dir/src/expr.cpp.o"
+},
+{
+  "directory": "/home/mooooonk/Code/CppProjects/Schemer/cmake-build-debug",
+  "command": "/usr/bin/c++ -g -fdiagnostics-color=always -g -o CMakeFiles/myscheme.dir/src/value.cpp.o -c /home/mooooonk/Code/CppProjects/Schemer/src/value.cpp",
+  "file": "/home/mooooonk/Code/CppProjects/Schemer/src/value.cpp",
+  "output": "CMakeFiles/myscheme.dir/src/value.cpp.o"
+},
+{
+  "directory": "/home/mooooonk/Code/CppProjects/Schemer/cmake-build-debug",
+  "command": "/usr/bin/c++ -g -fdiagnostics-color=always -g -o CMakeFiles/myscheme.dir/src/evaluation.cpp.o -c /home/mooooonk/Code/CppProjects/Schemer/src/evaluation.cpp",
+  "file": "/home/mooooonk/Code/CppProjects/Schemer/src/evaluation.cpp",
+  "output": "CMakeFiles/myscheme.dir/src/evaluation.cpp.o"
+},
+{
+  "directory": "/home/mooooonk/Code/CppProjects/Schemer/cmake-build-debug",
+  "command": "/usr/bin/c++ -g -fdiagnostics-color=always -g -o CMakeFiles/myscheme.dir/src/Def.cpp.o -c /home/mooooonk/Code/CppProjects/Schemer/src/Def.cpp",
+  "file": "/home/mooooonk/Code/CppProjects/Schemer/src/Def.cpp",
+  "output": "CMakeFiles/myscheme.dir/src/Def.cpp.o"
+}
+]

@@ -1,0 +1,3 @@
+/home/mooooonk/Code/CppProjects/Schemer/cmake-build-debug/CMakeFiles/myscheme.dir
+/home/mooooonk/Code/CppProjects/Schemer/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/mooooonk/Code/CppProjects/Schemer/cmake-build-debug/CMakeFiles/rebuild_cache.dir
