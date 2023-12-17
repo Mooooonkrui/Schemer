@@ -8,6 +8,7 @@
 #include <cstring>
 #include <vector>
 
+// Backend implement for universal value
 struct ValueBase {
     ValueType v_type;
     ValueBase(ValueType);
@@ -16,6 +17,7 @@ struct ValueBase {
     virtual ~ValueBase() = default;
 };
 
+// Outer API
 struct Value {
     SharedPtr<ValueBase> ptr;
     Value(ValueBase *);
@@ -25,6 +27,7 @@ struct Value {
     ValueBase* get() const;
 };
 
+// Binding set
 struct Assoc {
   SharedPtr<AssocList> ptr;
   Assoc(AssocList *);
@@ -33,12 +36,14 @@ struct Assoc {
   AssocList* get() const;
 };
 
+// Binding list
 struct AssocList {
   std::string x;
   Value v;
   Assoc next;
   AssocList(const std::string &, const Value &, Assoc &);
 };
+
 
 struct Void : ValueBase {
   Void();

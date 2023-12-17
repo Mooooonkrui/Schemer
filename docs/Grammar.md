@@ -137,6 +137,7 @@ scm> (lambda () (void))
 
 我们用 `body` 指代最后一个 `expr`。
 `(let ([var expr]*) expr)` 用于给局部变量赋值（赋值操作全部进行在原作用域上）并产生新的作用域， 在新的作用域下对最后的 `expr` 进行求值。 变量的赋值应当是依次进行， 即在原作用域上先给第一个 `var` 赋值， 再给第二个 `var` 赋值， 依次进行下去直到所有赋值语句完成， 创造新的作用域并对最后一个 `let` 语句的 `body` 求值。
+> Binded but not initialized, not assignable.
 
 ```
 scm> (let ([x 1] [y 1]) (+ x y))
@@ -152,6 +153,7 @@ scm> (let ([x 1]) (let ([y x] [x 3]) (+ x y)))
 `letrec` 与 `let` 的规则相差无几， 但一些特殊的处理方式使得 `letrec` 可以实现递归调用。
 
 具体而言， `letrec` 会先将所有的 `var` 赋值为 `Value(nullptr)` 加入原作用域中得到新的作用域 `env1`（这里赋值成 `Value(nullptr)` 意义应被理解为该变量被定义但无法被使用， 如果想要获取该变量的值则会报错， 你可以理解成 C++ 中函数的声明）， 然后再对所有的 `[var expr]` 依次求值（像 `let` 中一样）， 不同的地方是这次求值始终在作用域 `env1` 而非原作用域上， 求值的结果会得到新作用域 `env2`（如果出现求值失败则报错， 你的程序应当能够处理这种情况）。 此时， 需要注意的一点是， 假如 `[var expr]*` 中存在 `var` 被绑定到了 `Closure` 上， 则该 `Closure` 中的作用域应当被更改为 `env2` 而非原先的 `env1`（这个更改应当进行在 `env2` 中对应的 `var` 所绑定的值上， 由于我们是用指针实现作用域的， 这种对 `Closure` 的改变并不会改变 `env2` 所指向的内存空间）， 然后再返回在 `env2` 上对 `body` 求值的结果。
+> Binded and Initialized, but not evaluable.
 
 举一个例子
 

@@ -1,5 +1,7 @@
 #include "Def.hpp"
 
+#include <algorithm>
+
 std :: map<std :: string, ExprType> primitives;
 std :: map<std :: string, ExprType> reserved_words;
 

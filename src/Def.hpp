@@ -9,11 +9,11 @@
 #include <iostream>
 #include <map>
 
-struct Syntax;
-struct Expr;
-struct Value;
-struct AssocList;
-struct Assoc;
+struct Syntax;  // Syntax Tree
+struct Expr;    // AST
+struct Value;   // Immediate Value
+struct AssocList;   // Binding List
+struct Assoc;   // Local Binding
 
 enum ExprType
 {
@@ -50,7 +50,7 @@ enum ValueType
     V_TERMINATE   // safety
 };
 
-void initPrimitives();
-void initReservedWords();
+void initPrimitives();      // Init basic operators
+void initReservedWords();   // Init reserve words
 
 #endif
