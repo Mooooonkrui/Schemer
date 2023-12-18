@@ -10,15 +10,58 @@
 extern std::map<std::string, ExprType> primitives;
 extern std::map<std::string, ExprType> reserved_words;
 
-Value Let::eval(Assoc &env) {} // let expression
+Value Let::eval(Assoc &env) {
+    int n = bind.size();
+    std::vector<Value> pre_eval;
+    for (auto link: bind) pre_eval.push_back(link.second->eval(env));
+    for (int i = 0; i < n; i++) {
+        env = Assoc(new AssocList(bind[i].first, std::move(pre_eval[i]), env));
+    }
+    auto ans = body->eval(env);
+    for (int i = 0; i < n; i++) {
+        auto tmp = env;
+        env = tmp->next;
+    }
+    return ans;
+}
 
-Value Lambda::eval(Assoc &env) {} // lambda expression
+Value Lambda::eval(Assoc &env) {
+    throw RuntimeError("Function to impl");
+} // TODO: lambda expression
 
-Value Apply::eval(Assoc &e) {} // for function calling
+Value Apply::eval(Assoc &e) {
+    throw RuntimeError("Function to impl");
+} // TODO: for function calling
 
-Value Letrec::eval(Assoc &env) {} // letrec expression
+Value Letrec::eval(Assoc &env) {
+    int n = bind.size();
+    for (int i = 0; i < n; i++) {
+        env = Assoc(new AssocList(bind[i].first, std::move(VoidV()), env));
+    }
+    for (int i = 0; i < n; i++) {
+        env = Assoc(new AssocList(bind[i].first, std::move(bind[i].second->eval(env)), env));
+    }
+    auto ans = body->eval(env);
+    for (int i = 0; i < n; i++) {
+        auto tmp = env;
+        env = tmp->next;
+    }
+    for (int i = 0; i < n; i++) {
+        auto tmp = env;
+        env = tmp->next;
+    }
+    return ans;
+}
 
-Value Var::eval(Assoc &e) {} // evaluation of variable
+Value Var::eval(Assoc &e) {
+    auto ptr = e;
+    Value ans = VoidV();
+    while (ptr.get()) {
+        if (ptr->x == x && ptr->v->v_type != V_VOID) return ptr->v;
+        ptr = ptr->next;
+    }
+    throw RuntimeError("Runtime Error");
+}
 
 Value Fixnum::eval(Assoc &e) {
     return IntegerV(n);
@@ -43,7 +86,9 @@ Value Begin::eval(Assoc &e) {
     return es.back()->eval(e);
 } // begin expression
 
-Value Quote::eval(Assoc &e) {} // quote expression
+Value Quote::eval(Assoc &e) {
+    throw RuntimeError("Function to impl");
+} // TODO: quote expression
 
 Value MakeVoid::eval(Assoc &e) {
     return VoidV();
@@ -65,56 +110,56 @@ Value Mult::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return IntegerV(dynamic_cast<Integer *>(rand1.get())->n * dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        TRE;
+        throw RuntimeError("Runtime Error");
 } // *
 
 Value Plus::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return IntegerV(dynamic_cast<Integer *>(rand1.get())->n + dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        TRE;
+        throw RuntimeError("Runtime Error");
 } // +
 
 Value Minus::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return IntegerV(dynamic_cast<Integer *>(rand1.get())->n - dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        TRE;
+        throw RuntimeError("Runtime Error");
 } // -
 
 Value Less::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return BooleanV(dynamic_cast<Integer *>(rand1.get())->n < dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        TRE;
+        throw RuntimeError("Runtime Error");
 } // <
 
 Value LessEq::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return BooleanV(dynamic_cast<Integer *>(rand1.get())->n <= dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        TRE;
+        throw RuntimeError("Runtime Error");
 } // <=
 
 Value Equal::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return BooleanV(dynamic_cast<Integer *>(rand1.get())->n == dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        TRE;
+        throw RuntimeError("Runtime Error");
 } // =
 
 Value GreaterEq::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return BooleanV(dynamic_cast<Integer *>(rand1.get())->n >= dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        TRE;
+        throw RuntimeError("Runtime Error");
 } // >=
 
 Value Greater::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return BooleanV(dynamic_cast<Integer *>(rand1.get())->n > dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        TRE;
+        throw RuntimeError("Runtime Error");
 } // >
 
 Value IsEq::evalRator(const Value &rand1, const Value &rand2) {

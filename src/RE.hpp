@@ -1,7 +1,7 @@
 #ifndef RUNTIMEERROR
 #define RUNTIMEERROR
 
-#define TRE "throw RuntimeError(\"RuntimeError\")"
+#define TRE "throw RuntimeError()"
 
 #include <exception>
 #include <string>
