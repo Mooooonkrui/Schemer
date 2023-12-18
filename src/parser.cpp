@@ -81,7 +81,7 @@ Expr List::parse(Assoc &env) {
                 if (stxs.size() != 3) TRE;
                 if (auto second_one = dynamic_cast<List *>(stxs[1].get())) {
                     for (auto sub: second_one->stxs) {
-                        if (auto sub_one = dynamic_cast<Var *>(sub.get())) {
+                        if (auto sub_one = dynamic_cast<Var *>(sub->parse(env).get())) {
                             para.push_back(sub_one->x);
                         } else
                             TRE;
@@ -225,6 +225,7 @@ Expr List::parse(Assoc &env) {
                 TRE;
         }
     } else if (auto first_one = dynamic_cast<List *>(stxs.front().get())) {
+        //FIXME: Apply (let ([op (lambda (x) (* x x))]) (op 7))
         if (stxs.size() == 1) TRE;
         std::vector<Expr> para;
         for (int i = 1; i < stxs.size(); i++) {
