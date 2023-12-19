@@ -68,7 +68,8 @@ Expr List::parse(Assoc &env) {
                             if (sub_one->stxs.size() == 2) {
                                 if (sub_one->stxs[0]->type() == SynIdentifier) {
                                     if (auto ident = dynamic_cast<Var *>(sub_one->stxs[0]->parse(env).get())) {
-                                        bind.push_back({ident->x, sub_one->stxs[1]->parse(env)});
+                                        auto tmp = *ident;
+                                        bind.push_back({tmp.x, sub_one->stxs[1]->parse(env)});
                                     } else
                                         throw RuntimeError("Syntax Invalid");
                                 } else

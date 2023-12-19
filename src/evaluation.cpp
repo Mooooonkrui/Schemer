@@ -69,9 +69,10 @@ Value Fixnum::eval(Assoc &e) {
 
 Value If::eval(Assoc &e) {
     auto judge = cond->eval(e);
-    if (dynamic_cast<Boolean *>(judge.get())->b == false) {
-        return alter->eval(e);
-    } else return conseq->eval(e);
+    if (auto tmp = dynamic_cast<Boolean *>(judge.get())) {
+        if (tmp->b == false) return alter->eval(e);
+    }
+    return conseq->eval(e);
 } // if expression
 
 Value True::eval(Assoc &e) {
