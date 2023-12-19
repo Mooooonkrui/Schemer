@@ -88,8 +88,27 @@ Value Begin::eval(Assoc &e) {
 } // begin expression
 
 Value Quote::eval(Assoc &e) {
-    throw RuntimeError("Function to impl");
-} // TODO: quote expression
+    switch (s->type()) {
+        case SynIdentifier:
+            return SymbolV(dynamic_cast<Identifier *>(s.get())->s);
+        case SynNumber:
+            return IntegerV(dynamic_cast<Number *>(s.get())->n);
+        case SynTrueSyntax:
+            return BooleanV(true);
+        case SynFalseSyntax:
+            return BooleanV(false);
+        case SynList:
+            auto tmp = *dynamic_cast<List *>(s.get());
+            if (tmp.stxs.empty()) return NullV();
+            else {
+                Value slot = NullV();
+                for (auto x = tmp.stxs.rbegin(); x != tmp.stxs.rend(); ++x) {
+                    slot = PairV(Quote(*x).eval(e), slot);
+                }
+                return slot;
+            }
+    }
+}
 
 Value MakeVoid::eval(Assoc &e) {
     return VoidV();

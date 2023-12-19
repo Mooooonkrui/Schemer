@@ -7,6 +7,7 @@
 #include <memory>
 #include <cstring>
 #include <vector>
+#include <sstream>
 
 // Backend implement for universal value
 struct ValueBase {
