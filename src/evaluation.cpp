@@ -26,12 +26,37 @@ Value Let::eval(Assoc &env) {
 }
 
 Value Lambda::eval(Assoc &env) {
-    throw RuntimeError("Function to impl");
-} // TODO: lambda expression
+    return ClosureV(x, e, env);
+}
 
 Value Apply::eval(Assoc &e) {
-    throw RuntimeError("Function to impl");
-} // TODO: for function calling
+    auto func = rator->eval(e);
+    if (func->v_type != V_PROC) {
+        throw RuntimeError("Runtime Error: non-closure object as closure");
+    } else {
+        auto tmp = *dynamic_cast<Closure *>(func.get());
+        if (tmp.parameters.size() != rand.size()) {
+            throw RuntimeError("Runtime Error: closure parameters do not correspond with given instances");
+        } else {
+            std::vector<std::pair<std::string, Expr>> bind_list;
+            for (int i = 0; i < tmp.parameters.size(); i++) {
+                bind_list.push_back({tmp.parameters[i], rand[i]});
+            }
+            int n = bind_list.size();
+            std::vector<Value> pre_eval;
+            for (auto link: bind_list) pre_eval.push_back(link.second->eval(e));
+            for (int i = 0; i < n; i++) {
+                e = Assoc(new AssocList(bind_list[i].first, std::move(pre_eval[i]), e));
+            }
+            auto ans = tmp.e->eval(e);
+            for (int i = 0; i < n; i++) {
+                auto tmp = e;
+                e = tmp->next;
+            }
+            return ans;
+        }
+    }
+}
 
 Value Letrec::eval(Assoc &env) {
     int n = bind.size();
@@ -60,7 +85,7 @@ Value Var::eval(Assoc &e) {
         if (ptr->x == x && ptr->v->v_type != V_VOID) return ptr->v;
         ptr = ptr->next;
     }
-    throw RuntimeError("Runtime Error");
+    throw RuntimeError("Runtime Error: binding of " + x + " did not found");
 }
 
 Value Fixnum::eval(Assoc &e) {
@@ -130,56 +155,56 @@ Value Mult::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return IntegerV(dynamic_cast<Integer *>(rand1.get())->n * dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        throw RuntimeError("Runtime Error");
+        throw RuntimeError("Runtime Error: multiplication failed");
 } // *
 
 Value Plus::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return IntegerV(dynamic_cast<Integer *>(rand1.get())->n + dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        throw RuntimeError("Runtime Error");
+        throw RuntimeError("Runtime Error: addition failed");
 } // +
 
 Value Minus::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return IntegerV(dynamic_cast<Integer *>(rand1.get())->n - dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        throw RuntimeError("Runtime Error");
+        throw RuntimeError("Runtime Error: subtraction failed");
 } // -
 
 Value Less::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return BooleanV(dynamic_cast<Integer *>(rand1.get())->n < dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        throw RuntimeError("Runtime Error");
+        throw RuntimeError("Runtime Error: < compare failed");
 } // <
 
 Value LessEq::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return BooleanV(dynamic_cast<Integer *>(rand1.get())->n <= dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        throw RuntimeError("Runtime Error");
+        throw RuntimeError("Runtime Error: <= compare failed");
 } // <=
 
 Value Equal::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return BooleanV(dynamic_cast<Integer *>(rand1.get())->n == dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        throw RuntimeError("Runtime Error");
+        throw RuntimeError("Runtime Error: == compare failed");
 } // =
 
 Value GreaterEq::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return BooleanV(dynamic_cast<Integer *>(rand1.get())->n >= dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        throw RuntimeError("Runtime Error");
+        throw RuntimeError("Runtime Error: >= compare failed");
 } // >=
 
 Value Greater::evalRator(const Value &rand1, const Value &rand2) {
     if (rand1->v_type == V_INT && rand2->v_type == V_INT) {
         return BooleanV(dynamic_cast<Integer *>(rand1.get())->n > dynamic_cast<Integer *>(rand2.get())->n);
     } else
-        throw RuntimeError("Runtime Error");
+        throw RuntimeError("Runtime Error: > compare failed");
 } // >
 
 Value IsEq::evalRator(const Value &rand1, const Value &rand2) {
@@ -244,11 +269,11 @@ Value Not::evalRator(const Value &rand) {
 Value Car::evalRator(const Value &rand) {
     if (rand->v_type == V_PAIR) {
         return dynamic_cast<Pair *>(rand.get())->car;
-    }
+    } else throw RuntimeError("Runtime Error: can not destruct a non-pair object");
 } // car
 
 Value Cdr::evalRator(const Value &rand) {
     if (rand->v_type == V_PAIR) {
         return dynamic_cast<Pair *>(rand.get())->cdr;
-    }
+    } else throw RuntimeError("Runtime Error: can not destruct a non-pair object");
 } // cdr
