@@ -7,6 +7,7 @@
 #include "Def.hpp"
 #include "syntax.hpp"
 #include "expr.hpp"
+#include "value.hpp"
 #include <map>
 #include <cstring>
 #include <iostream>
@@ -41,13 +42,21 @@ Expr FalseSyntax::parse(Assoc &env) {
 }
 
 Expr List::parse(Assoc &env) {
-    if (stxs.empty()) return Expr(new MakeVoid());
+    if (stxs.empty()) throw RuntimeError("Syntax Invalid: empty list");
     if (auto first_one = dynamic_cast<Identifier *>(stxs.front().get())) {
         auto match_reserved_word = reserved_words.find(first_one->s);
         auto match_primitive = primitives.find(first_one->s);
         ExprType flag;
         if (match_reserved_word != reserved_words.end()) {
             flag = match_reserved_word->second;
+            Assoc env_tmp = env;
+            while (env_tmp.get()){
+                if(env_tmp->x == first_one->s){
+                    flag = E_VAR;
+                    break;
+                }
+                env_tmp = env_tmp->next;
+            }
         } else if (match_primitive != primitives.end()) {
             flag = match_primitive->second;
         } else {
@@ -60,6 +69,7 @@ Expr List::parse(Assoc &env) {
         switch (flag) {
             case E_LET: {
                 std::vector<std::pair<std::string, Expr>> bind;
+                Assoc env_next = env;
                 if (stxs.size() != 3) throw RuntimeError("Syntax Invalid: let parameters do not equal 3");
                 if (auto second_one = dynamic_cast<List *>(stxs[1].get())) {
                     for (auto sub: second_one->stxs) {
@@ -69,6 +79,7 @@ Expr List::parse(Assoc &env) {
                                     if (auto ident = dynamic_cast<Var *>(sub_one->stxs[0]->parse(env).get())) {
                                         auto tmp = *ident;
                                         bind.push_back({tmp.x, sub_one->stxs[1]->parse(env)});
+                                        env_next = Assoc(new AssocList(tmp.x, VoidV(), env_next));
                                     } else
                                         throw RuntimeError("Syntax Invalid: primitive name as binding name");
                                 } else
@@ -78,26 +89,29 @@ Expr List::parse(Assoc &env) {
                         } else
                             throw RuntimeError("Syntax Invalid: binding pair not list");
                     }
-                    return Expr(new Let(std::move(bind), stxs[2]->parse(env)));
+                    return Expr(new Let(std::move(bind), stxs[2]->parse(env_next)));
                 } else
                     throw RuntimeError("Syntax Invalid: binding list not list");
             }
             case E_LAMBDA: {
                 std::vector<std::string> para;
+                Assoc env_next = env;
                 if (stxs.size() != 3) throw RuntimeError("Syntax Invalid: lambda parameters do not equal 3");
                 if (auto second_one = dynamic_cast<List *>(stxs[1].get())) {
                     for (auto sub: second_one->stxs) {
                         if (auto sub_one = dynamic_cast<Var *>(sub->parse(env).get())) {
                             para.push_back(sub_one->x);
+                            env_next = Assoc(new AssocList(sub_one->x,VoidV(),env_next));
                         } else
                             throw RuntimeError("Syntax Invalid: primitive name or non-symbol object as binding name");
                     }
-                    return Expr(new Lambda(std::move(para), stxs[2]->parse(env)));
+                    return Expr(new Lambda(std::move(para), stxs[2]->parse(env_next)));
                 } else
                     throw RuntimeError("Syntax Invalid: lambda parameters list not list");
             }
             case E_LETREC: {
                 std::vector<std::pair<std::string, Expr>> bind;
+                Assoc env_next = env;
                 if (stxs.size() != 3) throw RuntimeError("Syntax Invalid: letrec parameters do not equal 3");
                 if (auto second_one = dynamic_cast<List *>(stxs[1].get())) {
                     for (auto sub: second_one->stxs) {
@@ -107,6 +121,7 @@ Expr List::parse(Assoc &env) {
                                     if (auto ident = dynamic_cast<Var *>(sub_one->stxs[0]->parse(env).get())) {
                                         auto tmp = *ident;
                                         bind.push_back({tmp.x, sub_one->stxs[1]->parse(env)});
+                                        env_next = Assoc(new AssocList(tmp.x, VoidV(), env_next));
                                     } else
                                         throw RuntimeError("Syntax Invalid: primitive name as binding name");
                                 } else
@@ -116,7 +131,7 @@ Expr List::parse(Assoc &env) {
                         } else
                             throw RuntimeError("Syntax Invalid: binding pair not list");
                     }
-                    return Expr(new Letrec(std::move(bind), stxs[2]->parse(env)));
+                    return Expr(new Letrec(std::move(bind), stxs[2]->parse(env_next)));
                 } else
                     throw RuntimeError("Syntax Invalid: binding list not list");
             }

@@ -13,19 +13,23 @@ extern std::map<std::string, ExprType> reserved_words;
 Value Let::eval(Assoc &env) {
     int n = bind.size();
     std::vector<Value> pre_eval;
+    Assoc env_next = env;
     for (auto link: bind) pre_eval.push_back(link.second->eval(env));
     for (int i = 0; i < n; i++) {
-        env = Assoc(new AssocList(bind[i].first, std::move(pre_eval[i]), env));
+        //std::cout << bind[i].first << " binded" << std::endl;
+        env_next = Assoc(new AssocList(bind[i].first, std::move(pre_eval[i]), env_next));
     }
-    auto ans = body->eval(env);
-    for (int i = 0; i < n; i++) {
-        auto tmp = env;
-        env = tmp->next;
-    }
+    auto ans = body->eval(env_next);
     return ans;
 }
 
 Value Lambda::eval(Assoc &env) {
+    /*
+    for (auto para: x) {
+        std::cout << para << " binded, value: #<void> \n";
+        env_next = Assoc(new AssocList(para, VoidV(), env_next));
+    }
+     */
     return ClosureV(x, e, env);
 }
 
@@ -38,6 +42,7 @@ Value Apply::eval(Assoc &e) {
         if (tmp.parameters.size() != rand.size()) {
             throw RuntimeError("Runtime Error: closure parameters do not correspond with given instances");
         } else {
+            Assoc env_next = tmp.env;
             std::vector<std::pair<std::string, Expr>> bind_list;
             for (int i = 0; i < tmp.parameters.size(); i++) {
                 bind_list.push_back({tmp.parameters[i], rand[i]});
@@ -46,13 +51,10 @@ Value Apply::eval(Assoc &e) {
             std::vector<Value> pre_eval;
             for (auto link: bind_list) pre_eval.push_back(link.second->eval(e));
             for (int i = 0; i < n; i++) {
-                e = Assoc(new AssocList(bind_list[i].first, std::move(pre_eval[i]), e));
+                //std::cout << bind_list[i].first << " binded" << std::endl;
+                env_next = Assoc(new AssocList(bind_list[i].first, std::move(pre_eval[i]), env_next));
             }
-            auto ans = tmp.e->eval(e);
-            for (int i = 0; i < n; i++) {
-                auto tmp = e;
-                e = tmp->next;
-            }
+            auto ans = tmp.e->eval(env_next);
             return ans;
         }
     }
@@ -60,21 +62,26 @@ Value Apply::eval(Assoc &e) {
 
 Value Letrec::eval(Assoc &env) {
     int n = bind.size();
+    Assoc env_bak = env;
     for (int i = 0; i < n; i++) {
-        env = Assoc(new AssocList(bind[i].first, std::move(VoidV()), env));
+        //std::cout << bind[i].first << " binded" << std::endl;
+        env_bak = Assoc(new AssocList(bind[i].first, bind[i].second->eval(env_bak), env_bak));
+        //env = Assoc(new AssocList(bind[i].first, bind[i].second->eval(env), env));
     }
-    for (int i = 0; i < n; i++) {
-        env = Assoc(new AssocList(bind[i].first, std::move(bind[i].second->eval(env)), env));
+    Assoc env_tmp = env_bak;
+    while (env_tmp.get() != env.get()) {
+        if (env_tmp->v->v_type == V_PROC) {
+            Assoc env_tmp2 = env_bak;
+            auto tmp = dynamic_cast<Closure *>(env_tmp->v.get());
+            while (env_tmp2.get() != env.get()) {
+                tmp->env = Assoc(new AssocList(env_tmp2->x, env_tmp2->v, tmp->env));
+                env_tmp2 = env_tmp2->next;
+            }
+        }
+        env_tmp = env_tmp->next;
     }
-    auto ans = body->eval(env);
-    for (int i = 0; i < n; i++) {
-        auto tmp = env;
-        env = tmp->next;
-    }
-    for (int i = 0; i < n; i++) {
-        auto tmp = env;
-        env = tmp->next;
-    }
+    auto ans = body->eval(env_bak);
+    if (ans->v_type == V_PROC) dynamic_cast<Closure *>(ans.get())->env = env_bak;
     return ans;
 }
 
