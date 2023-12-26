@@ -17,7 +17,7 @@ Value Let::eval(Assoc &env) {
     for (auto link: bind) pre_eval.push_back(link.second->eval(env));
     for (int i = 0; i < n; i++) {
         //std::cout << bind[i].first << " binded" << std::endl;
-        env_next = Assoc(new AssocList(bind[i].first, std::move(pre_eval[i]), env_next));
+        env_next.ptr = SharedPtr<AssocList>(new AssocList(bind[i].first, std::move(pre_eval[i]), env_next));
     }
     auto ans = body->eval(env_next);
     return ans;
@@ -52,7 +52,7 @@ Value Apply::eval(Assoc &e) {
             for (auto link: bind_list) pre_eval.push_back(link.second->eval(e));
             for (int i = 0; i < n; i++) {
                 //std::cout << bind_list[i].first << " binded" << std::endl;
-                env_next = Assoc(new AssocList(bind_list[i].first, std::move(pre_eval[i]), env_next));
+                env_next.ptr = SharedPtr<AssocList>(new AssocList(bind_list[i].first, std::move(pre_eval[i]), env_next));
             }
             auto ans = tmp.e->eval(env_next);
             return ans;
@@ -65,7 +65,7 @@ Value Letrec::eval(Assoc &env) {
     Assoc env_bak = env;
     for (int i = 0; i < n; i++) {
         //std::cout << bind[i].first << " binded" << std::endl;
-        env_bak = Assoc(new AssocList(bind[i].first, bind[i].second->eval(env_bak), env_bak));
+        env_bak.ptr = SharedPtr<AssocList>(new AssocList(bind[i].first, bind[i].second->eval(env_bak), env_bak));
         //env = Assoc(new AssocList(bind[i].first, bind[i].second->eval(env), env));
     }
     Assoc env_tmp = env_bak;
@@ -74,7 +74,7 @@ Value Letrec::eval(Assoc &env) {
             Assoc env_tmp2 = env_bak;
             auto tmp = dynamic_cast<Closure *>(env_tmp->v.get());
             while (env_tmp2.get() != env.get()) {
-                tmp->env = Assoc(new AssocList(env_tmp2->x, env_tmp2->v, tmp->env));
+                tmp->env.ptr = SharedPtr<AssocList>(new AssocList(env_tmp2->x, env_tmp2->v, tmp->env));
                 env_tmp2 = env_tmp2->next;
             }
         }

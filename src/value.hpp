@@ -35,6 +35,7 @@ struct Assoc {
   AssocList* operator -> () const;
   AssocList& operator * ();
   AssocList* get() const;
+  void insert(const std::string &x, const Value &v, Assoc &lst);
 };
 
 // Binding list
