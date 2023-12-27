@@ -52,7 +52,8 @@ Value Apply::eval(Assoc &e) {
             for (auto link: bind_list) pre_eval.push_back(link.second->eval(e));
             for (int i = 0; i < n; i++) {
                 //std::cout << bind_list[i].first << " binded" << std::endl;
-                env_next.ptr = SharedPtr<AssocList>(new AssocList(bind_list[i].first, std::move(pre_eval[i]), env_next));
+                env_next.ptr = SharedPtr<AssocList>(
+                        new AssocList(bind_list[i].first, std::move(pre_eval[i]), env_next));
             }
             auto ans = tmp.e->eval(env_next);
             return ans;
@@ -68,6 +69,8 @@ Value Letrec::eval(Assoc &env) {
         env_bak.ptr = SharedPtr<AssocList>(new AssocList(bind[i].first, bind[i].second->eval(env_bak), env_bak));
         //env = Assoc(new AssocList(bind[i].first, bind[i].second->eval(env), env));
     }
+
+    /*
     Assoc env_tmp = env_bak;
     while (env_tmp.get() != env.get()) {
         if (env_tmp->v->v_type == V_PROC) {
@@ -80,6 +83,40 @@ Value Letrec::eval(Assoc &env) {
         }
         env_tmp = env_tmp->next;
     }
+     */
+
+    Assoc env_tmp = env_bak;
+    while (env_tmp.get() != env.get()) {
+        std::vector<Value> stack;
+        auto root = env_tmp->v;
+        while (root->v_type == V_PROC || root->v_type == V_PAIR) {
+            stack.push_back(root);
+            if (root->v_type == V_PAIR) root = dynamic_cast<Pair *>(root.get())->car;
+            else break;
+        }
+        while (!stack.empty()) {
+            auto tmp = stack.back();
+            stack.pop_back();
+            if (tmp->v_type == V_PROC) {
+                auto tmp2 = dynamic_cast<Closure *>(tmp.get());
+                Assoc tmp3 = env_bak;
+                while (tmp3.get() != env.get()) {
+                    tmp2->env = Assoc(new AssocList(tmp3->x, tmp3->v, tmp2->env));
+                    tmp3 = tmp3->next;
+                }
+            } else {
+                //stack.push_back(dynamic_cast<Pair*>(tmp.get())->car);
+                auto stem = dynamic_cast<Pair *>(tmp.get())->cdr;
+                while (stem->v_type == V_PROC || stem->v_type == V_PAIR) {
+                    stack.push_back(stem);
+                    if (stem->v_type == V_PAIR) stem = dynamic_cast<Pair *>(stem.get())->car;
+                    else break;
+                }
+            }
+        }
+        env_tmp = env_tmp->next;
+    }
+
     auto ans = body->eval(env_bak);
     if (ans->v_type == V_PROC) dynamic_cast<Closure *>(ans.get())->env = env_bak;
     return ans;
