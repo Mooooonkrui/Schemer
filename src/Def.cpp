@@ -22,6 +22,7 @@ void initPrimitives()
     primitives["fixnum?"] = E_INTQ;
     primitives["null?"] = E_NULLQ;
     primitives["pair?"] = E_PAIRQ;
+    primitives["symbol?"] = E_SYMBOLQ;
     primitives["procedure?"] = E_PROCQ;
     primitives["cons"] = E_CONS;
     primitives["not"] = E_NOT;

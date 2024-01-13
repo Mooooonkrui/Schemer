@@ -84,7 +84,6 @@ Value Letrec::eval(Assoc &env) {
         env_tmp = env_tmp->next;
     }
      */
-
     Assoc env_tmp = env_bak;
     while (env_tmp.get() != env.get()) {
         std::vector<Value> stack;
